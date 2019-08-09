@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<!--
+	Eventually by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Codex Route Plotter</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script src="pretty-print-json.js"></script>
+		<link href="css/pretty-print-json.css" type="text/css" rel="stylesheet" />
+        <link href="https://unpkg.com/tabulator-tables@4.3.0/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.3.0/dist/js/tabulator.min.js"></script>
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<header id="header">
+				<h1>Codex Route Plotter</h1>
+				<p>This will find codex entries within jump range of two systems. Its used to plot a route for the Gnosis. Typically you would choose two systems approximately 1000Ly apart and the tool will find a system between them that has anything of interest</p>
+			</header>
+
+		<!-- Signup Form -->
+		<script>
+			/**
+			 * Get the URL parameters
+			 * source: https://css-tricks.com/snippets/javascript/get-url-variables/
+			 * @param  {String} url The URL
+			 * @return {Object}     The URL parameters
+			 */
+			var getParams = function (url) {
+				var params = {};
+				var parser = document.createElement('a');
+				parser.href = url;
+				var query = parser.search.substring(1);
+				var vars = query.split('&');
+				for (var i = 0; i < vars.length; i++) {
+					var pair = vars[i].split('=');
+					params[pair[0]] = decodeURIComponent(pair[1]);
+				}
+				return params;
+			};
+			var params=getParams(window.location.href);
+			$( document ).ready(function() {
+				if ( params.startSystem && params.endSystem && params.jumpRange) {
+				  //$(#form).submitForm();
+				  
+				  
+				  var startSystem=decodeURIComponent(params.startSystem).replace(/\+/g," ")
+				  var endSystem=decodeURIComponent(params.endSystem).replace(/\+/g," ")
+				  var jumpRange=decodeURIComponent(params.jumpRange).replace(/\+/g," ")
+				  
+				  doDecode(startSystem,endSystem,jumpRange);
+				  
+				  $("#startSystem").val(startSystem);
+				  $("#endSystem").val(endSystem);
+				  $("#jumpRange").val(jumpRange);
+				}
+			   
+			});
+
+            
+            function candidatesTable(json,startSystem,endSystem){
+                var table = new Tabulator("#results-table", {
+                        data:json,           //load row data from array
+                        layout:"fitColumns",      //fit columns to width of table
+                        responsiveLayout:"hide",  //hide columns that dont fit on the table
+                        tooltips:true,            //show tool tips on cells
+                        addRowPos:"top",          //when adding a new row, add it to the top of the table
+                        history:true,             //allow undo and redo actions on the table
+                        pagination:"local",       //paginate the data
+                        paginationSize:20,         //allow 7 rows per page of data
+                        movableColumns:true,      //allow column order to be changed
+                        resizableRows:true,       //allow row order to be changed
+                        initialSort:[             //set the initial sort order of the data
+                            {column:"matches", dir:"desc"},
+                            {column:"control", dir:"asc"},
+                        ],
+                        columns:[                 //define the table columns
+                            {title:"System", field:"system", headerFilter:true},
+							{title:"Body", field:"body", headerFilter:true},
+							{title:"Name", field:"english_name", headerFilter:true},
+							{title:"Category", field:"hud_category", headerFilter:true},                        
+							{title:"Distance from "+startSystem, field:"startSystem.jump",
+							align:"right",
+							formatter:"money", formatterParams:{
+								decimal:".",
+								thousand:",",
+								//symbol:"",
+							}},                        
+							{title:"Distance from "+endSystem, field:"startSystem.jump",
+							align:"right",
+							formatter:"money", formatterParams:{
+								decimal:".",
+								thousand:",",
+								//symbol:"",
+							}},                        
+                        ],
+                    });            
+            }
+            
+			function updateScreen(json,startSystem,endSystem){
+				console.log(json);
+								
+                candidatesTable(json,startSystem,endSystem);
+				
+				
+			}
+			function doDecode(startSystem,endSystem,jumpRange){
+				$("#result").text("Searching")
+				
+				fetch(encodeURI('https://us-central1-canonn-api-236217.cloudfunctions.net/codex_route?startSystem='+startSystem+'&endSystem='+endSystem+'&jumpRange='+jumpRange))
+				.then(response => response.json())
+				.then(json => updateScreen(json,startSystem,endSystem))
+			;
+			}
+			function submitform(){
+				var data = $(this).serializeArray();
+				doDecode($('input:text').val(),$("#data").val());
+				return false;
+			};
+			</script>
+			   <form id="form" method="GET">
+               <div id="search-container">
+					<input type="text" placeholder="Start System" name="startSystem" id="startSystem" >
+					<input type="text" placeholder="End System" name="endSystem" id="endSystem" >
+					<input type="text" placeholder="Jump range in Ly (max 500)" name="jumpRange" id="jumpRange" >
+				</div>
+				<input type="submit"> 
+				</form>
+            <p>
+            <div id="results-table">&nbsp;</div>
+            </p>
+			
+				</div><!-- /.container -->
+		<!-- Footer -->
+			<footer id="footer">
+				<ul class="icons">
+					<li><a href="http://twitter.com/CanonnResearch" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+					<li><a href="https://github.com/canonn-science/Aurvandil/blob/master/README.md" class="icon brands fa-github"><span class="label">GitHub</span></a></li>				
+				</ul>
+				<ul class="copyright">
+					<li>&copy; Canonn Interstellar Research.</li><li>Credits: <a href="http://html5up.net">HTML5 UP</a></li>
+				</ul>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
