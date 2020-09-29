@@ -83,6 +83,7 @@
 				movableColumns: true,      //allow column order to be changed
 				resizableRows: true,       //allow row order to be changed
 
+
 				columns: [                 //define the table columns
 					{ title: "System", field: "system", headerFilter: true },
 					{ title: "Name", field: "english_name", headerFilter: true },
@@ -105,6 +106,9 @@
 							//symbol:"",
 						}
 					},
+				],
+				initialSort: [
+					{ column: "startSystem.jump", dir: "asc" }, //sort by this first
 				],
 			});
 		}
