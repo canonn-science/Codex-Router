@@ -25,9 +25,10 @@
 	<!-- Header -->
 	<header id="header">
 		<h1>Codex Route Plotter</h1>
-		<p>This will find codex entries within jump range of two systems. Its used to plot a route for the Gnosis.
-			Typically you would choose two systems approximately 1000Ly apart and the tool will find a system between
-			them that has anything of interest</p>
+		<p>
+			This will show you all the sites of special scientific interest between two systems. Pick a range in light
+			years that you are prepared to detour from a straight line between the two systems
+		</p>
 	</header>
 
 	<!-- Signup Form -->
@@ -84,7 +85,6 @@
 
 				columns: [                 //define the table columns
 					{ title: "System", field: "system", headerFilter: true },
-					{ title: "Body", field: "body", headerFilter: true },
 					{ title: "Name", field: "english_name", headerFilter: true },
 					{ title: "Category", field: "hud_category", headerFilter: true },
 					{
@@ -137,7 +137,8 @@
 		<div id="search-container">
 			<input type="text" placeholder="Start System" name="startSystem" id="startSystem" class="typeahead">
 			<input type="text" placeholder="End System" name="endSystem" id="endSystem" class="typeahead">
-			<input type="text" placeholder="Jump range in Ly (max 500)" name="jumpRange" id="jumpRange">
+			<input type="text" placeholder="Maximum number of light years to deviate from the ideal route"
+				name="jumpRange" id="jumpRange">
 		</div>
 		<input type="submit">
 	</form>
