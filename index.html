@@ -113,19 +113,19 @@
 			});
 		}
 
-		function updateScreen(json, startSystem, endSystem) {
+		function updateScreen(json, startSystem, endSystem, jumpRange) {
 			console.log(json);
 
 			candidatesTable(json, startSystem, endSystem);
-
+			$("#map-url").html('<a href="https://map.canonn.tech/route_data.html?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange + '" target="_blank">View data on a 3D map</a>')
 
 		}
 		function doDecode(startSystem, endSystem, jumpRange) {
-			$("#result").text("Searching")
+			$("#results-table").text("Searching")
 
 			fetch(encodeURI('https://us-central1-canonn-api-236217.cloudfunctions.net/full_codex_route?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange))
 				.then(response => response.json())
-				.then(json => updateScreen(json, startSystem, endSystem))
+				.then(json => updateScreen(json, startSystem, endSystem, jumpRange))
 				;
 		}
 		function submitform() {
@@ -176,6 +176,7 @@
 		});
 	</script>
 
+	<div id="map-url">&nbsp;</div>
 	<p>
 	<div id="results-table">&nbsp;</div>
 	</p>
