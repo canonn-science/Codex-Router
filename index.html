@@ -119,7 +119,7 @@
 		function doDecode(startSystem, endSystem, jumpRange) {
 			$("#result").text("Searching")
 
-			fetch(encodeURI('https://us-central1-canonn-api-236217.cloudfunctions.net/codex_route?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange))
+			fetch(encodeURI('https://us-central1-canonn-api-236217.cloudfunctions.net/full_codex_route?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange))
 				.then(response => response.json())
 				.then(json => updateScreen(json, startSystem, endSystem))
 				;
@@ -147,17 +147,7 @@
 		const movies = new Bloodhound({
 			datumTokenizer: datum => Bloodhound.tokenizers.whitespace(datum.value),
 			queryTokenizer: Bloodhound.tokenizers.whitespace,
-			/*remote: {
-				//url: 'https://us-central1-canonn-api-236217.cloudfunctions.net/systems?q=%QUERY',
-				//url: 'https://spansh.co.uk/api/systems/field_values/system_names?q=%QUERY',
-				url: 'https://spansh.co.uk/api/systems/field_values/system_names?q=%QUERY',
-				// Map the remote source JSON array to a JavaScript object array
-				dataType: 'jsonp',
-				filter: movies => $.map(movies.results, function (movie) {
-					console.log(movie)
-					return { value: movie }
-				})
-			}*/
+
 			remote: {
 				dataType: 'jsonp',
 				url: 'https://spansh.co.uk/api/systems/field_values/system_names?q=%QUERY',
