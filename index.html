@@ -123,7 +123,7 @@
 		function doDecode(startSystem, endSystem, jumpRange) {
 			$("#results-table").text("Searching")
 
-			fetch(encodeURI('https://us-central1-canonn-api-236217.cloudfunctions.net/full_codex_route?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange))
+			fetch(encodeURI('https://us-central1-canonn-api-236217.cloudfunctions.net/full_codex_route-gmp?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange))
 				.then(response => response.json())
 				.then(json => updateScreen(json, startSystem, endSystem, jumpRange))
 				;
