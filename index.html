@@ -18,6 +18,7 @@
 	<link href="css/typeahead.css" type="text/css" rel="stylesheet" />
 	<link href="https://unpkg.com/tabulator-tables@4.3.0/dist/css/tabulator_midnight.min.css" rel="stylesheet">
 	<script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.3.0/dist/js/tabulator.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
 </head>
 
 <body class="is-preload">
@@ -51,17 +52,99 @@
 			}
 			return params;
 		};
+
+		const API_ENDPOINT = `https://us-central1-canonn-api-236217.cloudfunctions.net/get_codex_route`;
+		const API_LIMIT = 10000;
+
+		const codex = axios.create({
+			baseURL: API_ENDPOINT,
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json',
+			},
+		});
+
+
+
+		const getSites = async (startSystem, endSystem, jumpRange) => {
+			let records = [];
+			let keepGoing = true;
+			let API_START = 0;
+			while (keepGoing) {
+				let response = await reqSites(API_START, startSystem, endSystem, jumpRange);
+				await records.push.apply(records, response.data);
+				API_START += API_LIMIT;
+				if (response.data.length < API_LIMIT) {
+					keepGoing = false;
+					return records;
+				}
+			}
+		};
+
+		const reqSites = async (API_START, startSystem, endSystem, jumpRange) => {
+
+			let payload = await codex({
+				url: `?startSystem=${startSystem}&endSystem=${endSystem}&jumpRange=${jumpRange}&limit=${API_LIMIT}&offset=${API_START}`,
+				method: 'get'
+			});
+			console.log("fetching data")
+			return payload;
+		};
+
+		var codexData = []
+		var gmpData = []
+
+		const fetchCodexData = async function (sSystem, eSystem, jRange, resolvePromise) {
+			codexData = await getSites(sSystem, eSystem, jRange);
+			resolvePromise();
+		}
+
+		const parseGmp = function (url, resolvePromise) {
+			let fetchDataFromApi = async (url, resolvePromise) => {
+				let response = await fetch(url);
+				let result = await response.json();
+				gmpData = result
+				resolvePromise();
+				return result;
+			}
+			fetchDataFromApi(url, resolvePromise)
+
+		}
+
+		function getUrlParameter(name) {
+			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+			var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+			var results = regex.exec(location.href);
+			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+		};
+
+		var p1 = new Promise(function (resolve, reject) {
+			startSystem = getUrlParameter("startSystem")
+			endSystem = getUrlParameter("endSystem")
+			jumpRange = getUrlParameter("jumpRange")
+			fetchCodexData(startSystem, endSystem, jumpRange, resolve)
+		});
+
+		var p2 = new Promise(function (resolve, reject) {
+			startSystem = getUrlParameter("startSystem")
+			endSystem = getUrlParameter("endSystem")
+			jumpRange = getUrlParameter("jumpRange")
+			parseGmp('https://us-central1-canonn-api-236217.cloudfunctions.net/get_gmp_route?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange, resolve)
+		});
+
 		var params = getParams(window.location.href);
 		$(document).ready(function () {
 			if (params.startSystem && params.endSystem && params.jumpRange) {
-				//$(#form).submitForm();
+
 
 
 				var startSystem = decodeURIComponent(params.startSystem).replace(/\+/g, " ")
 				var endSystem = decodeURIComponent(params.endSystem).replace(/\+/g, " ")
 				var jumpRange = decodeURIComponent(params.jumpRange).replace(/\+/g, " ")
 
-				doDecode(startSystem, endSystem, jumpRange);
+				Promise.all([p1, p2]).then(function () {
+					updateScreen(codexData.concat(gmpData), startSystem, endSystem, jumpRange)
+				});
 
 				$("#startSystem").val(startSystem);
 				$("#endSystem").val(endSystem);
@@ -114,12 +197,13 @@
 		}
 
 		function updateScreen(json, startSystem, endSystem, jumpRange) {
-			console.log(json);
-
 			candidatesTable(json, startSystem, endSystem);
 			$("#map-url").html('<a href="https://map.canonn.tech/route_data.html?startSystem=' + startSystem + '&endSystem=' + endSystem + '&jumpRange=' + jumpRange + '" target="_blank">View data on a 3D map</a>')
 
 		}
+
+
+
 		function doDecode(startSystem, endSystem, jumpRange) {
 			$("#results-table").text("Searching")
 
